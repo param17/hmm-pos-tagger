@@ -1,0 +1,64 @@
+\documentclass[addpoints,12pt]{exam}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\Set}[1]{\big\{ #1 \big\}}
+\usepackage{color}
+\usepackage{xcolor,pgf,tikz,pgflibraryarrows,pgffor,pgflibrarysnakes}
+
+\usetikzlibrary{fit} % fitting shapes to coordinates
+\usetikzlibrary{backgrounds} % drawing the background after the foreground
+
+\usepgflibrary{shapes}
+\usetikzlibrary{snakes,automata}
+
+
+\tikzstyle{background}=[rectangle,fill=gray!10, inner sep=0.1cm, rounded corners=0mm]
+
+\usepackage{tikz}
+\tikzstyle{nloc}=[draw, text badly centered, rectangle, rounded corners, minimum size=2em,inner sep=0.5em]
+\tikzstyle{loc}=[draw,rectangle,minimum size=1.4em,inner sep=0em]
+\tikzstyle{trans}=[-latex, rounded corners]
+\tikzstyle{trans2}=[-latex, dashed, rounded corners]
+
+\newcommand{\Aa}{\mathcal{A}}
+
+
+\title{CSCI 5832: Natural Language Processing\\Assignment 2: Part-Of-Speech Tagging}
+\date{Assignment Report}
+\author{Paramjot Singh}
+\begin{document}
+\maketitle
+
+\pagestyle{headandfoot}
+\runningheadrule
+\firstpageheader{CSCI 5832X (Fall 2017)}{Assignment 2}{\today}
+\runningheader{CSCI 5832: Assignment 2}
+              {}
+              {Name: Paramjot Singh}
+              \firstpagefooter{}{}{}
+              \runningfooter{}{}{}
+
+Since being new to python, I enjoyed the assignment a lot. Learnt lot of new things/concepts. I tried to implement the whole solution in pure python without the use of any external python module whatsoever. As I'm a novice python programmer, my code won't be beautiful one. But, I tried to make it as simple as possible with all the comments and documentation.\\
+\\
+\textbf{Introduction}\\
+So starting with the implementation decisions. First thing,I did was to split the data based on Pareto principle. 80\% for Training set and 20\% for Dev set. Later on while improving accuracy, I used cross validation(will talk later about it).
+After loading and reading the input from test and train files, I'm converting the 'words' in lower cases to avoid any confusion between words such as 'restaurant' and 'Restaurant'. But later I realized there are no uppercase word in Training data. Still I kept the piece of code (thinking it might help with Test data). Coming to number of tags, I planned to skip using any start of sentence $<s>$ and end of sentence $</s>$ tag. I took care of them based in my code it self, by understanding the length of sentence based on '.' and '\textbackslash n' between the sentences. 
+\\ \\
+\textbf{Handling 'UNK', HMM and Baseline Algorithm}\\
+During the pre-processing step, after counting the number of occurences of each word in the train set. I've coded to make all the words with freq 0, 1 to be replaces with word 'UNK' retaining their tags. This will help in estimating the probability of say, P(UNK|NN). So, after converting the words to UNK. I'm calculating the necessary counts, tag bigram count, word bigram count, vocab count, etc.
+After finishing with all the essential counts, I moved forward to creating Transition State Probability, Observation Probability and Initial State Probability matrices. Using logarithmic values of each probability is a good idea to avoid underflow in case numbers go very small. Also, addition is faster and cheaper operation than multiplication with respect to computational cost. Next thing was implementing the basic Basline algorithm to see if the whole setup is working or not. Judging the tags based on highest probability given the word, formed the list of tags and printed next to input words supplied by dev set. The accuracy was roughly about 80\%. I know its not impressive :( , but good enough to know everything is working after some fixes here and there :) [remember novice python programmer].\\ \\
+\textbf{Viterbi and Smoothing Approaches}\\
+Started with the viterbi implementation based on pseudocode given in the book, creating table and calculating the best path and backtracking it. Got it working after few tries and integrated with the rest of the code. Tried the code and it worked!!! Accuracy was also good accuracy of 91\%. Now, I started working on the smoothing process hoping to improve accuracy further towards 100\%. Along with that implemented k-cross validation with k = 5 to get better estimate around accuracy. For smoothening process, started with Laplace Additive smoothing on transition state prob table. Number got up immediately to 93.32\%. Tried Laplace on observation table (just to experiment). Accuracy went down to below 70.20\%. Right away, reverted the code to keep smoothing to transition matrix only. Then implemented the Kneser-Ney and saw not much improvement compared to Laplace. Number was just 93.35\%, but at cost of extra computations. Hence, decided to continue with Laplace smoothing for Transition State matrix and no smoothing for Observation State matrix.\\ \\
+\textbf{Observations and Conclusion}\\
+Based on data from k-cross validation, the accuracy using the train set was averaged to 93\% without shuffling the data. The best number achieved with dev data with partitioning after shuffling was 96.47\%.\\
+\includegraphics[scale=.6]{max-accuracy}
+\\
+Most common errors, which I observed was confusion between NN (common noun) vs NNP  (proper noun) vs JJ (adjective). It's hard to distinguish,but important to distinguish esp. for information extraction. Next common was RB vs IN.\\Anyway, being the first assignment problem in python, I'm happy to gain lot of knowledge about language. Hoping to see good number with the final test data !
+
+
+
+\end{document}
+
